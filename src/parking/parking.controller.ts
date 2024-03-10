@@ -1,10 +1,14 @@
 import { Controller, Body, Get, Param, Patch } from '@nestjs/common';
 
 import { ParkingService } from './parking.service';
+import { ReservationService } from 'src/reservation/reservation.service';
 
 @Controller('parking')
 export class ParkingController {
-  constructor(private readonly parkingService: ParkingService) {}
+  constructor(
+    private readonly parkingService: ParkingService,
+    private readonly reservationService: ReservationService,
+  ) {}
 
   /**
    * Retrieves all parking spots.
@@ -25,6 +29,12 @@ export class ParkingController {
     @Param('id') id: string,
     @Body('occupied') occupied: boolean,
   ) {
+    const isSpotBooked = await this.reservationService.isBooked(id);
+    const spot = await this.parkingService.getSpotById(id);
+    if (isSpotBooked && spot.occupied === occupied) {
+      return false;
+    }
     this.parkingService.changeSpotState(id, occupied);
+    return true;
   }
 }

@@ -60,4 +60,20 @@ export class ReservationService {
   async deleteReservation(id: string) {
     await this.reservationModel.deleteOne({ _id: id }).exec();
   }
+
+  /**
+   * Checks if a spot is booked.
+   * @param id The id of the spot to check.
+   * @returns A promise that resolves to a boolean indicating if the spot is booked.
+   */
+  async isBooked(id: string): Promise<boolean> {
+    try {
+      const reservation = await this.reservationModel
+        .findOne({ spot: id })
+        .exec();
+      return !!reservation; // Returns true if a reservation exists for the spot, false otherwise
+    } catch (error) {
+      return false;
+    }
+  }
 }
